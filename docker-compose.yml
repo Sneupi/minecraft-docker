@@ -1,0 +1,27 @@
+services:
+
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:latest
+    container_name: minecraft-tunnel
+    network_mode: host
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+    restart: unless-stopped
+    depends_on:
+      - minecraft
+
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft-server
+    environment:
+      EULA: "TRUE"
+      TYPE: "VANILLA"
+      VERSION: "LATEST"
+      MEMORY: "2G"
+    stdin_open: true
+    tty: true
+    ports:
+      - "25565:25565"
+    volumes:
+      - ./minecraft-data:/data
+    restart: unless-stopped
