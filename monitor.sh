@@ -1,8 +1,16 @@
 #!/bin/bash
 
-# Run script in background (with logging)
+# Prevent multiple instances from running
 if [ "${1}" != "--background" ]; then
+    # Check if the background process is already running
+    if pgrep -f "$(basename "$0") --background" > /dev/null; then
+        echo "Monitor is already running. Exiting."
+        exit 1
+    fi
+
+    # Run script in background (with logging)
     nohup "$0" --background "$@" > $(basename "${0%.*}").log 2>&1 &
+    echo "Monitor started in background."
     exit 0
 fi
 shift
@@ -24,7 +32,7 @@ do
     # Trigger on status change
     if [ $status -ne $previous ]; then
         str=$([ $status -eq 0 ] && echo "ONLINE" || echo "OFFLINE")
-        printf '%(%F %T %Z)T - Minecraft Server %s\n' -1 $str
+        printf '%(%F %T %Z)T [%s] %s\n' -1 $TUNNEL_ADDRESS $str
         previous=$status
     fi
     
