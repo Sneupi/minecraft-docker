@@ -1,0 +1,25 @@
+services:
+
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:latest
+    container_name: minecraft_tunnel_agent
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - SECRET_KEY=${SECRET_KEY} # Injected variable
+
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft_server
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: "VANILLA"
+      VERSION: "LATEST"
+      MEMORY: "2G"
+    volumes:
+      - ./minecraft-data:/data
