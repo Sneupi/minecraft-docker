@@ -4,9 +4,12 @@ services:
     image: ghcr.io/playit-cloud/playit-agent:latest
     container_name: minecraft_tunnel_agent
     restart: unless-stopped
+    pull_policy: always
     network_mode: host
     environment:
       - SECRET_KEY=${SECRET_KEY} # Injected variable
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   minecraft:
     image: itzg/minecraft-server:latest
@@ -23,3 +26,25 @@ services:
       MEMORY: "2G"
     volumes:
       - ./minecraft-data:/data
+
+  backup:
+    image: itzg/mc-backup:latest
+    container_name: minecraft_backup
+    restart: unless-stopped
+    environment:
+      TZ: "UTC"
+      PRUNE_BACKUPS_DAYS: 7      # Prunes > 7d
+      CRON_SCHEDULE: "0 12 * * *" # Everyday @ noon
+    volumes:
+      - ./minecraft-data:/data:ro
+      - ./minecraft-backups:/backups
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --cleanup --include-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
