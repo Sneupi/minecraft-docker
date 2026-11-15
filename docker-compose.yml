@@ -2,18 +2,18 @@ services:
 
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
-    container_name: minecraft_tunnel_agent
+    container_name: mc_tunnel_agent
     restart: unless-stopped
     pull_policy: always
     network_mode: host
     environment:
-      - SECRET_KEY=${SECRET_KEY} # Injected variable
+      - SECRET_KEY=${SECRET_KEY}
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
   minecraft:
     image: itzg/minecraft-server:latest
-    container_name: minecraft_server
+    container_name: mc_server
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -24,24 +24,30 @@ services:
       TYPE: "VANILLA"
       VERSION: "LATEST"
       MEMORY: "2G"
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: "${RCON_PASSWORD}"
     volumes:
-      - ./minecraft-data:/data
+      - ./.minecraft/data:/data
 
   backup:
     image: itzg/mc-backup:latest
-    container_name: minecraft_backup
+    container_name: mc_backup
     restart: unless-stopped
     environment:
       TZ: "UTC"
-      PRUNE_BACKUPS_DAYS: 7      # Prunes > 7d
-      CRON_SCHEDULE: "0 12 * * *" # Everyday @ noon
+      PRUNE_BACKUPS_DAYS: 7
+      CRON_SCHEDULE: "0 12 * * *"
+      RCON_HOST: "minecraft"
+      RCON_PASSWORD: "${RCON_PASSWORD}"
     volumes:
-      - ./minecraft-data:/data:ro
-      - ./minecraft-backups:/backups
+      - ./.minecraft/data:/data:ro
+      - ./.minecraft/backups:/backups
+    depends_on:
+      - minecraft
 
   watchtower:
     image: nickfedor/watchtower:latest
-    container_name: minecraft_watchtower
+    container_name: mc_watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
