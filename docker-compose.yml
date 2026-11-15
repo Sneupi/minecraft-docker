@@ -40,8 +40,8 @@ services:
       - ./minecraft-backups:/backups
 
   watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
+    image: nickfedor/watchtower:latest
+    container_name: minecraft_watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
