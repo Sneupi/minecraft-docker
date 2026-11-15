@@ -36,7 +36,7 @@ services:
     environment:
       TZ: "UTC"
       PRUNE_BACKUPS_DAYS: 7
-      CRON_SCHEDULE: "0 12 * * *"
+      CRON_SCHEDULE: "0 9 * * *"
       RCON_HOST: "minecraft"
       RCON_PASSWORD: "${RCON_PASSWORD}"
     volumes:
